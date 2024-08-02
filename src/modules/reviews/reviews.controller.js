@@ -46,11 +46,18 @@ export const getProductReviews = asyncHandler(async (req, res, next) => {
   const product = await productModel.findById(_id);
   if (!product) return next(new AppError("Product is not exist", 404));
 
-  const reviews = await reviewModel.find({ productId: _id });
+  const apiFeatures = new ApiFeatures(
+    reviewModel.find({ productId: _id }),
+    req.query
+  ).pagination();
+
+  const reviews = await apiFeatures.mongooseQuery;
 
   !reviews
-    ? next(new AppError("Error getting reviews"))
-    : res.status(201).json(reviews);
+    ? next(new AppError("Failed to get reviews", 500))
+    : res
+        .status(201)
+        .json({ status: "success", page: apiFeatures.page, reviews });
 });
 
 export const deleteReview = asyncHandler(async (req, res, next) => {

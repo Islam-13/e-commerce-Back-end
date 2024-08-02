@@ -74,7 +74,7 @@ export const updateBrand = asyncHandler(async (req, res, next) => {
 });
 
 export const getBrands = asyncHandler(async (req, res, next) => {
-  const apiFeatures = new ApiFeatures(brandModel, req.query)
+  const apiFeatures = new ApiFeatures(brandModel.find(), req.query)
     .pagination()
     .filter()
     .sort()

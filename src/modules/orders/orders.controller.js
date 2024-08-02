@@ -79,7 +79,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
 
   req.data = { model: orderModel, _id: order._id };
 
-  if (req.body.coupon) {
+  if (req.body?.coupon) {
     await couponModel.updateOne(
       { code: couponCode.toLowerCase() },
       { $push: { usedBy: req.user._id } }
@@ -93,9 +93,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
     );
   }
 
-  if (flag) {
-    await cartModel.updateOne({ userId: req.user._id }, { products: [] });
-  }
+  await cartModel.updateOne({ userId: req.user._id }, { products: [] });
 
   //create pdf invocie
   const invoice = {
@@ -129,14 +127,41 @@ export const createOrder = asyncHandler(async (req, res, next) => {
       req.body.coupon = coupon.id;
     }
 
-    const paymentData = {
+    // const paymentData = {
+    //   stripe,
+    //   payment_method_types: ["card"],
+    //   mode: "payment",
+    //   customer_email: req.user.email,
+    //   metadata: {
+    //     orderId: order._id.toString(),
+    //     products: order.products,
+    //     invoice: `invoice-${order._id}.pdf`,
+    //   },
+    //   success_url: `${req.protocol}://${req.headers.host}/orders/success/${order._id}`,
+    //   cancel_url: `${req.protocol}://${req.headers.host}/orders/cancel/${order._id}`,
+    //   line_items: order.products.map((product) => {
+    //     return {
+    //       price_data: {
+    //         currency: "EGP",
+    //         product_data: {
+    //           name: product.title,
+    //         },
+    //         unit_amount: product.price * 100,
+    //       },
+    //       quantity: product.quantity,
+    //     };
+    //   }),
+    //   discounts: req.body?.coupon ? [{ coupon: req.body.couponId }] : [],
+    // };
+
+    const session = await cardPayment({
       stripe,
       payment_method_types: ["card"],
       mode: "payment",
       customer_email: req.user.email,
       metadata: {
         orderId: order._id.toString(),
-        products: order.products,
+        products: JSON.stringify(order.products),
         invoice: `invoice-${order._id}.pdf`,
       },
       success_url: `${req.protocol}://${req.headers.host}/orders/success/${order._id}`,
@@ -154,9 +179,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
         };
       }),
       discounts: req.body?.coupon ? [{ coupon: req.body.couponId }] : [],
-    };
-
-    const session = await cardPayment(paymentData);
+    });
 
     return res.status(201).json({ status: "success", url: session.url, order });
   }

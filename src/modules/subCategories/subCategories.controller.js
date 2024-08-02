@@ -48,7 +48,7 @@ export const createSubCategory = asyncHandler(async (req, res, next) => {
 });
 
 export const getSubCategories = asyncHandler(async (req, res, next) => {
-  const apiFeatures = new ApiFeatures(subCategoryModel, req.query)
+  const apiFeatures = new ApiFeatures(subCategoryModel.find(), req.query)
     .pagination()
     .filter()
     .sort()

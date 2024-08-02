@@ -1,7 +1,7 @@
 import multer from "multer";
 
 export const validExtension = {
-  image: ["image/jpg", "image/jpeg", "png", "gif"],
+  image: ["image/jpg", "image/jpeg", "image/png", "gif"],
 };
 
 const multerHost = (customValidation) => {

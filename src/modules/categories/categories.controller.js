@@ -76,7 +76,7 @@ export const updateCategory = asyncHandler(async (req, res, next) => {
 });
 
 export const getCategories = asyncHandler(async (req, res, next) => {
-  const apiFeatures = new ApiFeatures(categoryModel, req.query)
+  const apiFeatures = new ApiFeatures(categoryModel.find(), req.query)
     .pagination()
     .filter()
     .sort()

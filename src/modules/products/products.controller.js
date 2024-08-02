@@ -69,7 +69,7 @@ export const createProduct = asyncHandler(async (req, res, next) => {
 });
 
 export const getProducts = asyncHandler(async (req, res, next) => {
-  const apiFeatures = new ApiFeatures(productModel, req.query)
+  const apiFeatures = new ApiFeatures(productModel.find(), req.query)
     .pagination()
     .filter()
     .sort()
