@@ -225,7 +225,7 @@ export const webhook = asyncHandler(async (req, res, next) => {
   // Handle the event
   const { orderId, products, couponId, usedBy, email, invoice } =
     event.data.object.metadata;
-  if (event.type !== "checkout.session.completed") {
+  if (event.type != "checkout.session.completed") {
     const orderProducts = JSON.parse(products);
 
     console.log(orderProducts);
