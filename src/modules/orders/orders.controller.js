@@ -207,18 +207,18 @@ export const cancelOrder = asyncHandler(async (req, res, next) => {
 
 export const webhook = asyncHandler(async (req, res, next) => {
   const stripe = new Stripe(process.env.stripe_key);
-  const sig = request.headers["stripe-signature"];
+  const sig = req.headers["stripe-signature"];
 
   let event;
 
   try {
     event = stripe.webhooks.constructEvent(
-      request.body,
+      req.body,
       sig,
       process.env.endpointSecret
     );
   } catch (err) {
-    response.status(400).send(`Webhook Error: ${err.message}`);
+    res.status(400).send(`Webhook Error: ${err.message}`);
     return;
   }
 
