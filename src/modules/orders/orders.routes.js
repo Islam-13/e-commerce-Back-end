@@ -4,6 +4,7 @@ import * as OV from "./orders.validate.js";
 import auth from "../../../middleware/auth.js";
 import { systemRoles } from "../../utils/helpers.js";
 import validation from "../../../middleware/validation.js";
+import express from "express";
 
 const router = Router();
 
@@ -21,6 +22,6 @@ router.put(
   OC.cancelOrder
 );
 
-router.post("/webhook", OC.webhook);
+router.post("/webhook", express.raw({ type: "application/json" }), OC.webhook);
 
 export default router;
