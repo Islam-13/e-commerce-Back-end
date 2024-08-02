@@ -16,14 +16,9 @@ router.post(
   BC.createBrand
 );
 
-router.get("/", auth(Object.values(systemRoles)), BC.getBrands);
+router.get("/", BC.getBrands);
 
-router.get(
-  "/:_id",
-  auth(Object.values(systemRoles)),
-  validation(generalFields.params),
-  BC.getSpecificBrand
-);
+router.get("/:_id", validation(generalFields.params), BC.getSpecificBrand);
 
 router.put(
   "/:_id",

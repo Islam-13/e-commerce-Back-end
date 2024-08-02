@@ -16,11 +16,10 @@ router.post(
   SCC.createSubCategory
 );
 
-router.get("/", auth(Object.values(systemRoles)), SCC.getSubCategories);
+router.get("/", SCC.getSubCategories);
 
 router.get(
   "/:_id",
-  auth(Object.values(systemRoles)),
   validation(generalFields.params),
   SCC.getSpecificSubCategory
 );

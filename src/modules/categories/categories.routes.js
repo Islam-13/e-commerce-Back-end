@@ -27,14 +27,9 @@ router.put(
   CC.updateCategory
 );
 
-router.get("/", auth(Object.values(systemRoles)), CC.getCategories);
+router.get("/", CC.getCategories);
 
-router.get(
-  "/:_id",
-  auth(Object.values(systemRoles)),
-  validation(paramsId),
-  CC.getSpecificCategory
-);
+router.get("/:_id", validation(paramsId), CC.getSpecificCategory);
 
 router.delete(
   "/:_id",

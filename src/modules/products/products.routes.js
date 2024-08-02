@@ -24,9 +24,9 @@ router.post(
   PC.createProduct
 );
 
-router.get("/", auth(Object.values(systemRoles)), PC.getProducts);
+router.get("/", PC.getProducts);
 
-router.get("/:_id", auth(Object.values(systemRoles)), PC.getProduct);
+router.get("/:_id", PC.getProduct);
 
 router.delete("/:_id", auth([systemRoles.admin]), PC.deleteProduct);
 

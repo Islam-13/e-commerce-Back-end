@@ -14,6 +14,8 @@ router.post(
   RC.createReview
 );
 
+router.get("/", RC.getProductReviews);
+
 router.delete(
   "/:_id",
   auth(Object.values(systemRoles)),

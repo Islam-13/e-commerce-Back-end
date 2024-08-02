@@ -2,7 +2,7 @@ import orderModel from "../../../db/models/order.model.js";
 import productModel from "../../../db/models/product.model.js";
 import reviewModel from "../../../db/models/review.model.js";
 import AppError from "../../utils/appError.js";
-import { asyncHandler } from "../../utils/helpers.js";
+import { ApiFeatures, asyncHandler } from "../../utils/helpers.js";
 
 export const createReview = asyncHandler(async (req, res, next) => {
   const { productId } = req.params;
@@ -39,6 +39,18 @@ export const createReview = asyncHandler(async (req, res, next) => {
   await product.save();
 
   res.status(201).json({ status: "success", newReview });
+});
+
+export const getProductReviews = asyncHandler(async (req, res, next) => {
+  const { _id } = req.params;
+  const product = await productModel.findById(_id);
+  if (!product) return next(new AppError("Product is not exist", 404));
+
+  const reviews = await reviewModel.find({ productId: _id });
+
+  !reviews
+    ? next(new AppError("Error getting reviews"))
+    : res.status(201).json(reviews);
 });
 
 export const deleteReview = asyncHandler(async (req, res, next) => {
