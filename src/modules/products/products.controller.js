@@ -58,7 +58,7 @@ export const createProduct = asyncHandler(async (req, res, next) => {
     subPrice,
     customId,
     image: { secure_url, public_id },
-    coverImage: imagesArr,
+    coverImages: imagesArr,
     slug: slugify(title, { lower: true }),
     createdBy: req.user._id,
   });
