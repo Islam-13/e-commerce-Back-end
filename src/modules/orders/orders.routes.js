@@ -22,6 +22,6 @@ router.put(
   OC.cancelOrder
 );
 
-router.post("/webhook", express.raw({ type: "application/json" }), OC.test);
+router.post("/webhook", express.raw({ type: "application/json" }), OC.webhook);
 
 export default router;
