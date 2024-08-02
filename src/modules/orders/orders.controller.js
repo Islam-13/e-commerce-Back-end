@@ -280,5 +280,5 @@ export const test = asyncHandler(async (req, res, next) => {
 
   await orderModel.updateOne({ _id: orderId }, { status: "placed" });
 
-  return res.status(400).json({ message: "success" });
+  return res.status(200).json({ message: "success" });
 });
