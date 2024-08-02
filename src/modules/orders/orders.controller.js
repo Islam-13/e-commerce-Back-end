@@ -226,31 +226,29 @@ export const webhook = asyncHandler(async (req, res, next) => {
   const { orderId, products, couponId, usedBy, email, invoice } =
     event.data.object.metadata;
   if (event.type != "checkout.session.completed") {
-    const orderProducts = JSON.parse(products);
-
-    console.log(orderProducts);
+    // const orderProducts = JSON.parse(products);
 
     await orderModel.updateOne({ _id: orderId }, { status: "rejected" });
 
-    if (couponId) {
-      await couponModel.updateOne({ _id: couponId }, { $pull: { usedBy } });
-    }
+    // if (couponId) {
+    //   await couponModel.updateOne({ _id: couponId }, { $pull: { usedBy } });
+    // }
 
-    for (const product of orderProducts) {
-      await productModel.updateOne(
-        { _id: product.productId },
-        { $inc: { stock: product.quantity } }
-      );
-    }
+    // for (const product of orderProducts) {
+    //   await productModel.updateOne(
+    //     { _id: product.productId },
+    //     { $inc: { stock: product.quantity } }
+    //   );
+    // }
 
     return next(new AppError("payment rejected", 401));
   }
 
   await orderModel.updateOne({ _id: orderId }, { status: "placed" });
 
-  await sendEmail(email, "order invoice", "", [
-    { path: invoice, contentType: "application/pdf" },
-  ]);
+  // await sendEmail(email, "order invoice", "", [
+  //   { path: invoice, contentType: "application/pdf" },
+  // ]);
 
   res.status(201).json({ message: "payment success" });
 });
