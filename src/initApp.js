@@ -13,7 +13,11 @@ function initApp(app, express) {
 
   connectionDB();
 
-  app.use(express.json());
+  app.use((req, res, next) => {
+    if (req.originalUrl == "/orders/webhook") {
+      next();
+    } else express.json()(req, res, next);
+  });
 
   app.get("/", (req, res) =>
     res.status(201).json({ message: "Welcome to e-commerce app." })

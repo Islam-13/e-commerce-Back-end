@@ -21,4 +21,6 @@ router.put(
   OC.cancelOrder
 );
 
+router.post("/webhook", OC.webhook);
+
 export default router;

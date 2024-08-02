@@ -127,34 +127,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
       req.body.coupon = coupon.id;
     }
 
-    // const paymentData = {
-    //   stripe,
-    //   payment_method_types: ["card"],
-    //   mode: "payment",
-    //   customer_email: req.user.email,
-    //   metadata: {
-    //     orderId: order._id.toString(),
-    //     products: order.products,
-    //     invoice: `invoice-${order._id}.pdf`,
-    //   },
-    //   success_url: `${req.protocol}://${req.headers.host}/orders/success/${order._id}`,
-    //   cancel_url: `${req.protocol}://${req.headers.host}/orders/cancel/${order._id}`,
-    //   line_items: order.products.map((product) => {
-    //     return {
-    //       price_data: {
-    //         currency: "EGP",
-    //         product_data: {
-    //           name: product.title,
-    //         },
-    //         unit_amount: product.price * 100,
-    //       },
-    //       quantity: product.quantity,
-    //     };
-    //   }),
-    //   discounts: req.body?.coupon ? [{ coupon: req.body.couponId }] : [],
-    // };
-
-    const session = await cardPayment({
+    const paymentData = {
       stripe,
       payment_method_types: ["card"],
       mode: "payment",
@@ -163,6 +136,9 @@ export const createOrder = asyncHandler(async (req, res, next) => {
         orderId: order._id.toString(),
         products: JSON.stringify(order.products),
         invoice: `invoice-${order._id}.pdf`,
+        couponId: req.body?.coupon ? req.body.coupon._id : null,
+        usedBy: req.user._id.toString(),
+        email: req.user.email,
       },
       success_url: `${req.protocol}://${req.headers.host}/orders/success/${order._id}`,
       cancel_url: `${req.protocol}://${req.headers.host}/orders/cancel/${order._id}`,
@@ -179,7 +155,9 @@ export const createOrder = asyncHandler(async (req, res, next) => {
         };
       }),
       discounts: req.body?.coupon ? [{ coupon: req.body.couponId }] : [],
-    });
+    };
+
+    const session = await cardPayment(paymentData);
 
     return res.status(201).json({ status: "success", url: session.url, order });
   }
@@ -225,4 +203,54 @@ export const cancelOrder = asyncHandler(async (req, res, next) => {
   res
     .status(200)
     .json({ status: "success", message: "Order cancelled successfully" });
+});
+
+export const webhook = asyncHandler(async (req, res, next) => {
+  const stripe = new Stripe(process.env.stripe_key);
+  const sig = request.headers["stripe-signature"];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      request.body,
+      sig,
+      process.env.endpointSecret
+    );
+  } catch (err) {
+    response.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+
+  // Handle the event
+  const { orderId, products, couponId, usedBy, email, invoice } =
+    event.data.object.metadata;
+  if (event.type !== "checkout.session.completed") {
+    const orderProducts = JSON.parse(products);
+
+    console.log(orderProducts);
+
+    await orderModel.updateOne({ _id: orderId }, { status: "rejected" });
+
+    if (couponId) {
+      await couponModel.updateOne({ _id: couponId }, { $pull: { usedBy } });
+    }
+
+    for (const product of orderProducts) {
+      await productModel.updateOne(
+        { _id: product.productId },
+        { $inc: { stock: product.quantity } }
+      );
+    }
+
+    return next(new AppError("payment rejected", 401));
+  }
+
+  await orderModel.updateOne({ _id: orderId }, { status: "placed" });
+
+  await sendEmail(email, "order invoice", "", [
+    { path: invoice, contentType: "application/pdf" },
+  ]);
+
+  res.status(201).json({ message: "payment success" });
 });
